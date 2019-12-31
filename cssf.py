@@ -1,9 +1,13 @@
 import gspread
-import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 from sqlalchemy import create_engine
-from sqlalchemy.types import NVARCHAR
-from sqlalchemy import Integer
+
+from campaña.analisis_sot import importa_asot
+from campaña.atf import importa_atf
+from campaña.preventivo_hfc import importa_prevhfc
+from campaña.repitencia_hfc import importa_repithfc
+from campaña.validaciones import importa_validaciones
+from campaña.seguimiento import importa_seguimiento
 
 engine = create_engine('mssql+pymssql://***REMOVED***:123@10.197.91.1:1433/CLARO_CSSF')
 
@@ -26,220 +30,10 @@ gcreds = {
 credentials = ServiceAccountCredentials.from_json_keyfile_dict(gcreds, scope)
 gc = gspread.authorize(credentials)
 
-# ATF
-ws_atf = gc.open_by_key('1N6k7Lqk4jctrk-nhovjsuZVgaPtSI7LNWScwpR0xxWc').sheet1
-
-data = pd.DataFrame(ws_atf.get_all_records())
-data.columns = ['Marca temporal', 'Usuario Evaluador', 'Perfil Evaluador', 'SN - Cod',
-                'Usuario Asesor', 'Teléfono Cliente', 'Nombre Cliente', 'TMO',
-                'SOT - Caso', 'Motivo', 'Detalle llamada',
-                '1.1 Excede el tiempo de espera permitido',
-                '1.2 Personaliza',
-                '1.3 Asesor tutea al cliente',
-                '1.4 Cumplimiento de speech bienvenida - despedida',
-                '1.5 Utiliza un lenguaje inapropiado con el UF',
-                '1.6 Atiende la llamada en el tiempo establecido',
-                '1.7 Solicita tiempos de espera innecesarios',
-                '1.8 Indica el motivo del uso del tiempo de espera',
-                '1.9 Retoma agradeciendo la espera',
-                '2.1 Presta atencion a comentarios_solicitudes de UF',
-                '2.2 Silencios incomodos',
-                '2.3 Solicita_confirma mas de una vez una informacion innecesariamente',
-                '2.4 Identifica de forma completa el motivo de la incidencia_caso',
-                '2.5 Identifica el numero del cual llama',
-                '3.1 Suministra informacion incompleta',
-                '3.2 Suministra informacion incorrecta',
-                '3.3 Derivacion correcta casos',
-                '3.4 Descartes para entrega de solucion',
-                '3.5 Gestiona reagendamiento',
-                '3.6 Cambia estado de caso',
-                '3.7 Trabaja variacion_incidencias',
-                '3.8 Solicitud y validacion de los datos',
-                '3.9 Sondeo correcto y completo',
-                '3.10 Utilizacion de aplicaciones',
-                '4.1 Utiliza plantilla correcta para el registro',
-                '4.2 Tipifica de manera correcta_completa en aplicativos',
-                '5.1 Manejo de clientes criticos',
-                '5.2 Interrumpe al cliente',
-                '5.3 Lenguaje adecuado y entonacion de la voz',
-                '5.4 Demuestra mala actitud',
-                '5.5 Exceso de confianza con el UF',
-                '6.1 Recomienda smart home',
-                'Mala Praxis', 'Observaciones', 'Fecha llamada']
-
-data.to_sql('ATF', con=engine,
-            if_exists='replace',
-            dtype={'Marca temporal': NVARCHAR(length=100),
-                   'Usuario Evaluador': NVARCHAR(length=100),
-                   'Perfil Evaluador': NVARCHAR(length=50),
-                   'SN - Cod': NVARCHAR(length=20),
-                   'Usuario Asesor': NVARCHAR(length=10),
-                   'Teléfono Cliente': NVARCHAR(length=20),
-                   'Nombre Cliente': NVARCHAR(length=100),
-                   'TMO': Integer(),
-                   'SOT - Caso': NVARCHAR(length=20),
-                   'Motivo': NVARCHAR(length=100),
-                   'Detalle llamada': NVARCHAR(length=3500),
-                   '1.1 Excede el tiempo de espera permitido': NVARCHAR(length=4),
-                   '1.2 Personaliza': NVARCHAR(length=4),
-                   '1.3 Asesor tutea al cliente': NVARCHAR(length=4),
-                   '1.4 Cumplimiento de speech bienvenida - despedida': NVARCHAR(length=4),
-                   '1.5 Utiliza un lenguaje inapropiado con el UF': NVARCHAR(length=4),
-                   '1.6 Atiende la llamada en el tiempo establecido': NVARCHAR(length=4),
-                   '1.7 Solicita tiempos de espera innecesarios': NVARCHAR(length=4),
-                   '1.8 Indica el motivo del uso del tiempo de espera': NVARCHAR(length=4),
-                   '1.9 Retoma agradeciendo la espera': NVARCHAR(length=4),
-                   '2.1 Presta atencion a comentarios_solicitudes de UF': NVARCHAR(length=4),
-                   '2.2 Silencios incomodos': NVARCHAR(length=4),
-                   '2.3 Solicita_confirma mas de una vez una informacion innecesariamente': NVARCHAR(length=4),
-                   '2.4 Identifica de forma completa el motivo de la incidencia_caso': NVARCHAR(length=4),
-                   '2.5 Identifica el numero del cual llama': NVARCHAR(length=4),
-                   '3.1 Suministra informacion incompleta': NVARCHAR(length=4),
-                   '3.2 Suministra informacion incorrecta': NVARCHAR(length=4),
-                   '3.3 Derivacion correcta casos': NVARCHAR(length=4),
-                   '3.4 Descartes para entrega de solucion': NVARCHAR(length=4),
-                   '3.5 Gestiona reagendamiento': NVARCHAR(length=4),
-                   '3.6 Cambia estado de caso': NVARCHAR(length=4),
-                   '3.7 Trabaja variacion_incidencias': NVARCHAR(length=4),
-                   '3.8 Solicitud y validacion de los datos': NVARCHAR(length=4),
-                   '3.9 Sondeo correcto y completo': NVARCHAR(length=4),
-                   '3.10 Utilizacion de aplicaciones': NVARCHAR(length=4),
-                   '4.1 Utiliza plantilla correcta para el registro': NVARCHAR(length=4),
-                   '4.2 Tipifica de manera correcta_completa en aplicativos': NVARCHAR(length=4),
-                   '5.1 Manejo de clientes criticos': NVARCHAR(length=4),
-                   '5.2 Interrumpe al cliente': NVARCHAR(length=4),
-                   '5.3 Lenguaje adecuado y entonacion de la voz': NVARCHAR(length=4),
-                   '5.4 Demuestra mala actitud': NVARCHAR(length=4),
-                   '5.5 Exceso de confianza con el UF': NVARCHAR(length=4),
-                   '6.1 Recomienda smart home': NVARCHAR(length=4),
-                   'Mala Praxis': NVARCHAR(length=200),
-                   'Observaciones': NVARCHAR(length=3500),
-                   'Fecha llamada': NVARCHAR(length=100)})
-
-# VALIDACIONES
-ws_validaciones = gc.open_by_key('1jaYNOVyOTveMbCAOCOU5LsawoRZDtJD6rPIOT9-Wf50').sheet1
-data = pd.DataFrame(ws_validaciones.get_all_records())
-data.columns = ['Marca temporal', 'Usuario Evaluador', 'Perfil Evaluador', 'SN - Cod',
-                'Usuario Asesor', 'Teléfono Cliente', 'Nombre Cliente', 'TMO',
-                'SOT - Caso', 'Motivo', 'Detalle llamada',
-                '1.1 No identifica interlocutor',
-                '1.2 Cumplimiento de speech bienvenida-despedida',
-                '1.3 Utiliza un lenguaje inapropiado con el UF',
-                '1.4 No solicita tiempo de espera',
-                '1.5 Solicita tiempos de espera innecesarios',
-                '1.6 No retoma agradeciendo la espera',
-                '1.7 Excede el tiempo de espera permitido',
-                '1.8 No atiende la llamada en el tiempo establecido',
-                '1.9 Asesor tutea al cliente',
-                '2.1 No presta atencion a comentarios/solicitudes de UF',
-                '2.2 Solicitud de datos',
-                '2.3 Validacion de datos',
-                '2.4 Solicita_confirma mas de una vez una informacion innecesaria',
-                '3.1 Suministra informacion incompleta',
-                '3.2 Suministra informacion incorrecta',
-                '3.3 Cierre de sot_cambio de estado',
-                '3.4 Descartes con aplicativos',
-                '4.1 No tipifica de manera completa en aplicativos internos',
-                '4.2 No tipifica en aplicativos',
-                '4.3 Plantilla incorrecta',
-                '4.4 Tipifica de manera incorrecta en aplicativos',
-                '5.1 Manejo de clientes criticos_otras consultas',
-                '5.2 Demuestra mala actitud',
-                '5.3 Muletillas',
-                '5.4 Interrumpe al cliente',
-                '5.5 Lenguaje adecuado y entonacion de la  voz',
-                '6.1 Recomienda smart home',
-                'Mala Praxis', 'Observaciones', 'Fecha llamada']
-
-data.to_sql('VALIDACIONES',
-            con=engine,
-            if_exists='replace',
-            dtype={'Marca temporal': NVARCHAR(length=100),
-                   'Usuario Evaluador': NVARCHAR(length=100),
-                   'Perfil Evaluador': NVARCHAR(length=50),
-                   'SN - Cod': NVARCHAR(length=20),
-                   'Usuario Asesor': NVARCHAR(length=10),
-                   'Teléfono Cliente': NVARCHAR(length=20),
-                   'Nombre Cliente': NVARCHAR(length=100),
-                   'TMO': Integer(),
-                   'SOT - Caso': NVARCHAR(length=20),
-                   'Motivo': NVARCHAR(length=100),
-                   'Detalle llamada': NVARCHAR(length=3500),
-                   '1.1 No identifica interlocutor': NVARCHAR(length=4),
-                   '1.2 Cumplimiento de speech bienvenida-despedida': NVARCHAR(length=4),
-                   '1.3 Utiliza un lenguaje inapropiado con el UF': NVARCHAR(length=4),
-                   '1.4 No solicita tiempo de espera': NVARCHAR(length=4),
-                   '1.5 Solicita tiempos de espera innecesarios': NVARCHAR(length=4),
-                   '1.6 No retoma agradeciendo la espera': NVARCHAR(length=4),
-                   '1.7 Excede el tiempo de espera permitido': NVARCHAR(length=4),
-                   '1.8 No atiende la llamada en el tiempo establecido': NVARCHAR(length=4),
-                   '1.9 Asesor tutea al cliente': NVARCHAR(length=4),
-                   '2.1 No presta atencion a comentarios/solicitudes de UF': NVARCHAR(length=4),
-                   '2.2 Solicitud de datos': NVARCHAR(length=4),
-                   '2.3 Validacion de datos': NVARCHAR(length=4),
-                   '2.4 Solicita_confirma mas de una vez una informacion innecesaria': NVARCHAR(length=4),
-                   '3.1 Suministra informacion incompleta': NVARCHAR(length=4),
-                   '3.2 Suministra informacion incorrecta': NVARCHAR(length=4),
-                   '3.3 Cierre de sot_cambio de estado': NVARCHAR(length=4),
-                   '3.4 Descartes con aplicativos': NVARCHAR(length=4),
-                   '4.1 No tipifica de manera completa en aplicativos internos': NVARCHAR(length=4),
-                   '4.2 No tipifica en aplicativos': NVARCHAR(length=4),
-                   '4.3 Plantilla incorrecta': NVARCHAR(length=4),
-                   '4.4 Tipifica de manera incorrecta en aplicativos': NVARCHAR(length=4),
-                   '5.1 Manejo de clientes criticos_otras consultas': NVARCHAR(length=4),
-                   '5.2 Demuestra mala actitud': NVARCHAR(length=4),
-                   '5.3 Muletillas': NVARCHAR(length=4),
-                   '5.4 Interrumpe al cliente': NVARCHAR(length=4),
-                   '5.5 Lenguaje adecuado y entonacion de la  voz': NVARCHAR(length=4),
-                   '6.1 Recomienda smart home': NVARCHAR(length=4),
-                   'Mala Praxis': NVARCHAR(length=200),
-                   'Observaciones': NVARCHAR(length=3500),
-                   'Fecha llamada': NVARCHAR(length=100)})
-
-# SEGUIMIENTO
-ws_seguimiento = gc.open_by_key('1MWRkLjB3hpuCUX8UNlOqCqQHg_XT4HdqPuI2SXdd8BY').sheet1
-data = pd.DataFrame(ws_seguimiento.get_all_records())
-data.columns = ['Marca temporal', 'Usuario Evaluador', 'Perfil Evaluador', 'SN - Cod',
-                'Fecha llamada', 'Usuario Asesor', 'Teléfono Cliente', 'Nombre Cliente',
-                'TMO', 'SOT - Caso', 'Motivo', 'Detalle llamada',
-                'NO INGRESA TIPIFICACION',
-                'NO TIPIFICA DE FORMA COMPLETA',
-                'CUANDO NO SE DERIVA LA GESTION REALIZADA PARA SU ATENCION',
-                'CUANDO SE DERIVA UNA GESTION DE MANERA INCORRECTA',
-                'INGRESA DE MANERA INCORRECTA LOS DATOS EN EL APLICATIVO',
-                'NO INGRESA_INGRESA LOS DATOS EN EL APLICATIVO DE MANERA PARCIAL',
-                'VALIDACION DE LOS DATOS',
-                'PLANTILLA INCORRECTA O IMCOMPLETA',
-                'UTILIZACIÓN DE APLICACIONES',
-                'ESCRITURA INCOHERENTE',
-                'PRESENTA FALTAS ORTOGRAFICAS',
-                'Observaciones']
-
-data.to_sql('SEGUIMIENTO',
-            con=engine,
-            if_exists='replace',
-            dtype={'Marca temporal': NVARCHAR(length=100),
-                   'Usuario Evaluador': NVARCHAR(length=100),
-                   'Perfil Evaluador': NVARCHAR(length=50),
-                   'SN - Cod': NVARCHAR(length=20),
-                   'Usuario Asesor': NVARCHAR(length=10),
-                   'Teléfono Cliente': NVARCHAR(length=20),
-                   'Nombre Cliente': NVARCHAR(length=100),
-                   'TMO': Integer(),
-                   'SOT - Caso': NVARCHAR(length=20),
-                   'Motivo': NVARCHAR(length=100),
-                   'Detalle llamada': NVARCHAR(length=3500),
-                   'NO INGRESA TIPIFICACION': NVARCHAR(length=4),
-                   'NO TIPIFICA DE FORMA COMPLETA': NVARCHAR(length=4),
-                   'CUANDO NO SE DERIVA LA GESTION REALIZADA PARA SU ATENCION': NVARCHAR(length=4),
-                   'CUANDO SE DERIVA UNA GESTION DE MANERA INCORRECTA': NVARCHAR(length=4),
-                   'INGRESA DE MANERA INCORRECTA LOS DATOS EN EL APLICATIVO': NVARCHAR(length=4),
-                   'NO INGRESA_INGRESA LOS DATOS EN EL APLICATIVO DE MANERA PARCIAL': NVARCHAR(length=4),
-                   'VALIDACION DE LOS DATOS': NVARCHAR(length=4),
-                   'PLANTILLA INCORRECTA O IMCOMPLETA': NVARCHAR(length=4),
-                   'UTILIZACIÓN DE APLICACIONES': NVARCHAR(length=4),
-                   'ESCRITURA INCOHERENTE': NVARCHAR(length=4),
-                   'PRESENTA FALTAS ORTOGRAFICAS': NVARCHAR(length=4),
-                   'Observaciones': NVARCHAR(length=3500),
-                   'Fecha llamada': NVARCHAR(length=100)})
+importa_atf(gc, engine)  # Sigma
+importa_seguimiento(gc, engine)
+importa_validaciones(gc, engine)  # Sigma
+importa_asot(gc, engine)
+importa_prevhfc(gc, engine)
+importa_repithfc(gc, engine)
 input('Todo OK, presiona cualquier tecla para salir.')
