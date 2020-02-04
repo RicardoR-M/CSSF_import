@@ -34,7 +34,7 @@ def importa_seguimiento(gc, engine):
                        'Nombre Cliente': NVARCHAR(length=100),
                        'TMO': Integer(),
                        'SOT - Caso': NVARCHAR(length=20),
-                       'Motivo': NVARCHAR(length=100),
+                       'Motivo': NVARCHAR(length=200),
                        'Detalle llamada': NVARCHAR(length=3500),
                        'NO INGRESA TIPIFICACION': NVARCHAR(length=4),
                        'NO TIPIFICA DE FORMA COMPLETA': NVARCHAR(length=4),

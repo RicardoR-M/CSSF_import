@@ -55,7 +55,7 @@ def importa_atf(gc, engine):
                        'Nombre Cliente': NVARCHAR(length=100),
                        'TMO': Integer(),
                        'SOT - Caso': NVARCHAR(length=20),
-                       'Motivo': NVARCHAR(length=100),
+                       'Motivo': NVARCHAR(length=200),
                        'Detalle llamada': NVARCHAR(length=3500),
                        '1.1 Excede el tiempo de espera permitido': NVARCHAR(length=4),
                        '1.2 Personaliza': NVARCHAR(length=4),

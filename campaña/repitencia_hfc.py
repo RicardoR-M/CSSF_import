@@ -55,7 +55,7 @@ def importa_repithfc(gc, engine):
                        'Nombre Cliente': NVARCHAR(length=100),
                        'TMO': Integer(),
                        'SOT - Caso': NVARCHAR(length=20),
-                       'Motivo': NVARCHAR(length=100),
+                       'Motivo': NVARCHAR(length=200),
                        'Detalle llamada': NVARCHAR(length=3500),
                        'SUMINISTRA INFORMACIÓN - SUMINISTRA INFORMACIÓN INCOMPLETA': NVARCHAR(length=4),
                        'SUMINISTRA INFORMACIÓN - SUMINISTRA INFORMACIÓN INCORRECTA': NVARCHAR(length=4),
